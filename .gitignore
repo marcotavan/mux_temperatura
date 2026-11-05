@@ -8,3 +8,4 @@
 /managed_components/
 *.log
 /.vscode/
+/deploy/mosquitto/config/passwords

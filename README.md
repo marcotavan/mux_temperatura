@@ -1,5 +1,7 @@
 # Temperature centrale termica
 
+Per installare il broker sul server Docker seguire la [guida Docker Compose](deploy/mosquitto/README.md).
+
 Firmware ESP-IDF 6.1 per ESP32-WROOM (`esp32`), ESP32-C3 ed ESP32-C6.
 Fino a 8 DS18B20 su un unico bus 1-Wire; letture ogni 15 secondi,
 invio MQTT e discovery Home Assistant. Nessun comando su caldaia o pompe.
