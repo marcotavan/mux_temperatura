@@ -19,6 +19,7 @@
 
 #define MAX_SENSORS 8
 #define MQTT_UP BIT0
+#define WIFI_UP BIT1
 static const char *TAG = "centrale";
 static EventGroupHandle_t events;
 static esp_mqtt_client_handle_t mqtt;
@@ -87,16 +88,20 @@ static void wifi_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     if (base == WIFI_EVENT && id == WIFI_EVENT_STA_START) esp_wifi_connect();
     if (base == WIFI_EVENT && id == WIFI_EVENT_STA_DISCONNECTED) {
-        xEventGroupClearBits(events, MQTT_UP);
+        xEventGroupClearBits(events, MQTT_UP | WIFI_UP);
         esp_wifi_connect();
     }
-    if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) ESP_LOGI(TAG, "Wi-Fi connesso");
+    if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
+        xEventGroupSetBits(events, WIFI_UP);
+        ESP_LOGI(TAG, "Wi-Fi connesso");
+    }
 }
 
-static void scan(onewire_bus_handle_t bus)
+static esp_err_t scan(onewire_bus_handle_t bus)
 {
     onewire_device_iter_handle_t it;
-    if (onewire_new_device_iter(bus, &it) != ESP_OK) return;
+    esp_err_t create_err = onewire_new_device_iter(bus, &it);
+    if (create_err != ESP_OK) return create_err;
     onewire_device_t dev;
     esp_err_t err;
     while ((err = onewire_device_iter_get_next(it, &dev)) == ESP_OK) {
@@ -112,6 +117,32 @@ static void scan(onewire_bus_handle_t bus)
     }
     if (err != ESP_OK && err != ESP_ERR_NOT_FOUND) ESP_LOGW(TAG, "Ricerca sonde: %s", esp_err_to_name(err));
     onewire_del_device_iter(it);
+    return err == ESP_ERR_NOT_FOUND ? ESP_OK : err;
+}
+
+static onewire_bus_handle_t create_bus(void)
+{
+    onewire_bus_handle_t bus;
+    // Keeps an unwired input high during bench tests; external 4.7k is still required.
+    onewire_bus_config_t bc = { .bus_gpio_num = CONFIG_CT_GPIO, .flags.en_pull_up = true };
+    onewire_bus_rmt_config_t rc = { .max_rx_bytes = 10 };
+    ESP_ERROR_CHECK(onewire_new_bus_rmt(&bc, &rc, &bus));
+    return bus;
+}
+
+static void recover_bus(onewire_bus_handle_t *bus)
+{
+    // A timed-out RMT reception may leave the driver's RX channel busy.
+    // Release sensor handles before replacing their underlying bus, retaining ROM identities.
+    for (int i = 0; i < sensor_count; i++) ESP_ERROR_CHECK(ds18b20_del_device(sensors[i].handle));
+    ESP_ERROR_CHECK(onewire_bus_del(*bus));
+    *bus = create_bus();
+    for (int i = 0; i < sensor_count; i++) {
+        onewire_device_t dev = { .bus = *bus, .address = sensors[i].rom };
+        ds18b20_config_t cfg = {};
+        ESP_ERROR_CHECK(ds18b20_new_device_from_enumeration(&dev, &cfg, &sensors[i].handle));
+    }
+    ESP_LOGW(TAG, "Bus 1-Wire reinizializzato; nuovo tentativo al prossimo ciclo");
 }
 
 void app_main(void)
@@ -162,22 +193,31 @@ void app_main(void)
     mqtt = esp_mqtt_client_init(&mc);
     assert(mqtt);
     ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt, ESP_EVENT_ANY_ID, mqtt_event, NULL));
-    if (strlen(CONFIG_CT_WIFI_SSID)) ESP_ERROR_CHECK(esp_mqtt_client_start(mqtt));
-
-    onewire_bus_handle_t bus;
-    onewire_bus_config_t bc = { .bus_gpio_num = CONFIG_CT_GPIO };
-    onewire_bus_rmt_config_t rc = { .max_rx_bytes = 10 };
-    ESP_ERROR_CHECK(onewire_new_bus_rmt(&bc, &rc, &bus));
+    bool mqtt_started = false;
+    onewire_bus_handle_t bus = create_bus();
     TickType_t wake = xTaskGetTickCount();
     while (true) {
-        scan(bus);
-        esp_err_t conversion = ds18b20_trigger_temperature_conversion_for_all(bus);
+        if (!mqtt_started && (xEventGroupGetBits(events) & WIFI_UP)) {
+            ESP_ERROR_CHECK(esp_mqtt_client_start(mqtt));
+            mqtt_started = true;
+        }
+        esp_err_t scan_result = scan(bus);
+        esp_err_t conversion = scan_result;
+        if (scan_result == ESP_OK) {
+            if (sensor_count) conversion = ds18b20_trigger_temperature_conversion_for_all(bus);
+            else ESP_LOGI(TAG, "Nessuna sonda collegata; in attesa (GPIO %d)", CONFIG_CT_GPIO);
+        }
+        bool recover = conversion == ESP_ERR_TIMEOUT || conversion == ESP_ERR_INVALID_STATE;
         // The driver waits 800 ms for all 12-bit conversions to finish.
         bool connected = (xEventGroupGetBits(events) & MQTT_UP) != 0;
         if (connected) publish(availability, "online", true);
         for (int i = 0; i < sensor_count; i++) {
             float temperature = NAN;
             err = conversion == ESP_OK ? ds18b20_get_temperature(sensors[i].handle, &temperature) : conversion;
+            if (err == ESP_ERR_TIMEOUT || err == ESP_ERR_INVALID_STATE) {
+                recover = true;
+                conversion = err; // Do not issue further reads on a potentially stuck channel.
+            }
             bool valid = err == ESP_OK && isfinite(temperature) && temperature >= -55 && temperature <= 125;
             if (valid) ESP_LOGI(TAG, "%016" PRIx64 ": %.2f C", sensors[i].rom, temperature);
             else ESP_LOGW(TAG, "%016" PRIx64 ": lettura non valida (%s)", sensors[i].rom, esp_err_to_name(err));
@@ -192,6 +232,7 @@ void app_main(void)
                 publish(topic, value, false);
             }
         }
+        if (recover) recover_bus(&bus);
         xTaskDelayUntil(&wake, pdMS_TO_TICKS(CONFIG_CT_PERIOD * 1000));
     }
 }

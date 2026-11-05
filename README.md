@@ -20,6 +20,7 @@ Per WROOM usare `esp32`, per C3 usare `esp32c3`.
 Nel menu **Centrale termica** impostare SSID e password Wi-Fi, URI del broker
 MQTT (esempio `mqtt://192.168.1.10:1883`), utente/password e GPIO dati.
 SSID vuoto disabilita la rete e permette di leggere le sonde dal monitor seriale.
+MQTT viene avviato dopo l'assegnazione dell'IP Wi-Fi.
 Il GPIO 4 e l'indirizzo del broker sono segnaposto da verificare prima del collegamento.
 Non usare pin occupati da flash, USB, console o periferiche della specifica scheda.
 
@@ -39,6 +40,11 @@ Usare sonde a tre fili: VDD a 3,3 V, GND comune e DQ al GPIO scelto.
 Inserire una resistenza esterna da 4,7 kohm tra DQ e 3,3 V.
 Tutte le sonde condividono alimentazione e linea dati. La modalità parassita
 non è supportata. Verificare il pinout reale delle sonde, senza affidarsi ai colori.
+Il firmware abilita anche il pull-up interno per mantenere stabile il GPIO
+quando si prova la scheda senza cablaggio: non sostituisce quello esterno.
+Senza sonde registra lo stato di attesa e non avvia conversioni.
+Dopo un timeout o uno stato RMT non valido reinizializza il bus al termine
+del ciclo, conservando gli indirizzi delle sonde gia note.
 Lunghezze e disposizione dei cavi saranno da valutare sull'impianto;
 provare prima le sonde con collegamenti corti.
 
@@ -71,7 +77,9 @@ La discovery viene ripubblicata ogni ciclo per gestire anche il riavvio di Home 
 
 Compilazione verificata con ESP-IDF 6.1 per `esp32`, `esp32c3` e `esp32c6`,
 inclusa generazione dei binari e controllo dello spazio nella partizione app.
-Non ancora provato su scheda, sonde e broker reali.
+Verificato su WROOM via seriale: avvio senza sonde per tre cicli,
+connessione Wi-Fi e MQTT al broker reale, senza timeout RMT o errori di stato.
+Restano da verificare letture con sonde reali e recupero da guasti del cablaggio.
 
 Prima dell'installazione verificare lettura delle 8 sonde, nomi dopo riavvio,
 scollegamento e riconnessione di una sonda, perdita Wi-Fi, riavvio broker e Home Assistant.
