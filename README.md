@@ -17,9 +17,13 @@ idf.py menuconfig
 ```
 
 Per WROOM usare `esp32`, per C3 usare `esp32c3`.
+Per C6 il file `sdkconfig.defaults.esp32c6` seleziona la partizione applicativa
+standard da 1500 KiB, necessaria per includere il setup web (flash minima 2 MiB).
+Se si riusa un vecchio sdkconfig C6, selezionare in menuconfig
+**Partition Table > Single factory app (large)** prima di compilare.
 Nel menu **Centrale termica** impostare SSID e password Wi-Fi, URI del broker
 MQTT (esempio `mqtt://192.168.1.10:1883`), utente/password e GPIO dati.
-SSID vuoto disabilita la rete e permette di leggere le sonde dal monitor seriale.
+SSID vuoto apre la rete di configurazione; le letture seriali restano disponibili.
 MQTT viene avviato dopo l'assegnazione dell'IP Wi-Fi.
 Il GPIO 4 e l'indirizzo del broker sono segnaposto da verificare prima del collegamento.
 Non usare pin occupati da flash, USB, console o periferiche della specifica scheda.
@@ -33,6 +37,39 @@ Sostituire COM5 con la porta effettiva. Uscire dal monitor con Ctrl+].
 Non caricare il firmware di un target su un altro modello.
 Le credenziali finiscono in sdkconfig e nel firmware: i file locali di configurazione
 sono esclusi da Git. Il trasporto previsto è MQTT sulla rete locale, senza TLS.
+
+## Configurazione dal telefono
+
+Non occorre ricompilare per cambiare rete o credenziali MQTT:
+
+1. Con scheda gia avviata tenere premuto **BOOT per 5 secondi**, poi rilasciarlo.
+   Non tenerlo premuto durante accensione/reset: su queste schede serve anche al bootloader.
+2. Nel monitor seriale leggere nome rete `Centrale-Setup-XXXXXX` e password setup.
+   La password e casuale, propria della scheda, viene conservata in NVS e resta uguale ai riavvii.
+3. Dal telefono collegarsi a quella rete WPA2, rimanendo collegati anche se segnala assenza di Internet.
+4. Aprire esplicitamente **http://192.168.4.1** nel browser. Non e previsto captive portal automatico.
+5. Impostare SSID/password e broker MQTT, ad esempio `mqtt://192.168.2.22:1883`, utente `esp32` e password.
+6. Premere **Salva e riavvia**. Il setup si chiude al riavvio e la scheda si ricollega.
+
+Le password attuali non vengono restituite alla pagina: lasciare il campo vuoto
+le mantiene; quando si cambia rete bisogna inserire la nuova password.
+Le caselle apposite permettono di usare una rete aperta o cancellare la password MQTT.
+Le impostazioni vengono salvate insieme in NVS, mantenute agli aggiornamenti normali
+del firmware e hanno precedenza sui valori di menuconfig. Un erase-flash completo
+cancella anche queste impostazioni e la password del setup.
+
+Il setup si apre anche automaticamente senza SSID oppure dopo 45 secondi senza
+connessione Wi-Fi (all'avvio o dopo una disconnessione), permettendo di correggere
+credenziali errate. Resta aperto fino al riavvio; le letture continuano e l'eventuale
+connessione alla rete domestica viene ristabilita dopo l'attivazione AP.
+Una password MQTT errata, da sola, non apre automaticamente il setup:
+usare BOOT per modificarla. La pagina accetta richieste solo sull'indirizzo AP,
+non sull'IP della scheda nella rete domestica.
+
+Il pulsante e attivo basso con pull-up interno: GPIO 0 sul WROOM e GPIO 9 su C3/C6.
+Verificare il pinout della scheda. Modificarlo in **Centrale termica > GPIO pulsante setup**
+oppure impostare `-1` per disabilitarlo; non usare lo stesso GPIO delle sonde.
+GPIO sonde e intervallo letture restano configurabili da menuconfig.
 
 ## Collegamenti
 
@@ -79,6 +116,12 @@ Compilazione verificata con ESP-IDF 6.1 per `esp32`, `esp32c3` e `esp32c6`,
 inclusa generazione dei binari e controllo dello spazio nella partizione app.
 Verificato su WROOM via seriale: avvio senza sonde per tre cicli,
 connessione Wi-Fi e MQTT al broker reale, senza timeout RMT o errori di stato.
+Verificati sul WROOM anche apertura dell'AP con pressione BOOT simulata via USB,
+avvio del server setup e rifiuto HTTP 403 delle richieste dall'IP LAN domestico.
+La pagina supporta i socket IPv4 e quelli IPv4 mappati su IPv6 usati da ESP-IDF.
+Confermati dal telefono apertura della pagina e salvataggio della configurazione.
+Verificati poi via seriale, dopo un ulteriore riavvio, caricamento dei dati NVS,
+riconnessione Wi-Fi e MQTT e assenza dell'AP quando la rete domestica funziona.
 Restano da verificare letture con sonde reali e recupero da guasti del cablaggio.
 
 Prima dell'installazione verificare lettura delle 8 sonde, nomi dopo riavvio,

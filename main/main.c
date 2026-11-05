@@ -16,6 +16,7 @@
 #include "cJSON.h"
 #include "onewire_bus.h"
 #include "ds18b20.h"
+#include "setup.h"
 
 #define MAX_SENSORS 8
 #define MQTT_UP BIT0
@@ -30,6 +31,7 @@ typedef struct {
 } sensor_t;
 static sensor_t sensors[MAX_SENSORS];
 static int sensor_count;
+static ct_settings_t settings;
 
 static void publish(const char *topic, const char *payload, bool retain)
 {
@@ -86,12 +88,14 @@ static void mqtt_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 
 static void wifi_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
-    if (base == WIFI_EVENT && id == WIFI_EVENT_STA_START) esp_wifi_connect();
+    if (base == WIFI_EVENT && id == WIFI_EVENT_STA_START && settings.ssid[0]) esp_wifi_connect();
     if (base == WIFI_EVENT && id == WIFI_EVENT_STA_DISCONNECTED) {
+        ct_setup_wifi_connected(false);
         xEventGroupClearBits(events, MQTT_UP | WIFI_UP);
-        esp_wifi_connect();
+        if (settings.ssid[0]) esp_wifi_connect();
     }
     if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
+        ct_setup_wifi_connected(true);
         xEventGroupSetBits(events, WIFI_UP);
         ESP_LOGI(TAG, "Wi-Fi connesso");
     }
@@ -153,6 +157,7 @@ void app_main(void)
         err = nvs_flash_init();
     }
     ESP_ERROR_CHECK(err);
+    ct_settings_load(&settings);
     events = xEventGroupCreate();
     assert(events);
     uint8_t mac[6];
@@ -167,23 +172,23 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_event, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, wifi_event, NULL));
     wifi_config_t wifi = {};
-    if (strlen(CONFIG_CT_WIFI_SSID) > sizeof(wifi.sta.ssid) ||
-        strlen(CONFIG_CT_WIFI_PASSWORD) > sizeof(wifi.sta.password)) {
+    if (strlen(settings.ssid) > sizeof(wifi.sta.ssid) ||
+        strlen(settings.wifi_password) > sizeof(wifi.sta.password)) {
         ESP_LOGE(TAG, "Credenziali Wi-Fi troppo lunghe");
         return;
     }
-    memcpy(wifi.sta.ssid, CONFIG_CT_WIFI_SSID, strlen(CONFIG_CT_WIFI_SSID));
-    memcpy(wifi.sta.password, CONFIG_CT_WIFI_PASSWORD, strlen(CONFIG_CT_WIFI_PASSWORD));
+    memcpy(wifi.sta.ssid, settings.ssid, strlen(settings.ssid));
+    memcpy(wifi.sta.password, settings.wifi_password, strlen(settings.wifi_password));
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi));
-    if (strlen(CONFIG_CT_WIFI_SSID)) ESP_ERROR_CHECK(esp_wifi_start());
-    else ESP_LOGW(TAG, "SSID vuoto: configurare Centrale termica in menuconfig");
+    ESP_ERROR_CHECK(esp_wifi_start());
+    ct_setup_init(settings.ssid[0] != 0);
 
     esp_mqtt_client_config_t mc = {
-        .broker.address.uri = CONFIG_CT_MQTT_URI,
-        .credentials.username = CONFIG_CT_MQTT_USER,
-        .credentials.authentication.password = CONFIG_CT_MQTT_PASSWORD,
+        .broker.address.uri = settings.mqtt_uri,
+        .credentials.username = settings.mqtt_user,
+        .credentials.authentication.password = settings.mqtt_password,
         .credentials.client_id = node,
         .session.last_will = { .topic = availability, .msg = "offline", .qos = 1, .retain = true },
         .session.keepalive = 30,

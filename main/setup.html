@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Centrale termica - Configurazione</title>
+<style>
+body{font:16px system-ui,sans-serif;background:#eef3f4;color:#172d35;margin:0;padding:24px}main{max-width:480px;margin:auto;background:white;border-radius:16px;padding:24px}h1{font-size:26px}label{display:block;margin-top:18px}input:not([type=checkbox]){box-sizing:border-box;width:100%;padding:12px;margin-top:6px;border:1px solid #98aab0;border-radius:6px;font:inherit}small{display:block;color:#47616b;margin-top:6px}button{margin-top:24px;width:100%;padding:14px;background:#126779;color:white;border:0;border-radius:6px;font:inherit;font-weight:600}button:disabled{opacity:.6}#status{white-space:pre-wrap;line-height:1.5}fieldset{border:0;padding:0;margin:24px 0}legend{font-weight:bold;font-size:20px}
+</style>
+<main><h1>Centrale termica</h1><p>Configura la rete Wi-Fi e il collegamento a Home Assistant tramite MQTT.</p>
+<form id="form"><fieldset><legend>Wi-Fi di casa</legend>
+<label>Nome rete (SSID)<input id="ssid" required maxlength="32" autocomplete="off"></label>
+<label>Password Wi-Fi<input id="wifi_password" type="password" maxlength="64" autocomplete="new-password"></label>
+<small>Lascia vuoto per mantenere la password attuale. Se cambi rete, inserisci la nuova password.</small>
+<label><input id="wifi_open" type="checkbox"> Rete senza password</label>
+</fieldset><fieldset><legend>Broker MQTT</legend>
+<label>Indirizzo broker<input id="mqtt_uri" required placeholder="mqtt://192.168.2.22:1883" autocomplete="off"></label>
+<label>Utente<input id="mqtt_user" maxlength="128" autocomplete="off"></label>
+<label>Password MQTT<input id="mqtt_password" type="password" maxlength="128" autocomplete="new-password"></label>
+<small>Lascia vuoto per mantenere la password attuale.</small>
+<label><input id="mqtt_clear_password" type="checkbox"> Cancella la password MQTT attuale</label>
+</fieldset><button id="save" disabled>Salva e riavvia</button></form>
+<p id="status" role="status" aria-live="polite">Caricamento configurazione...</p>
+<small>Il salvataggio riavvia la scheda. Se i dati Wi-Fi non sono corretti, la rete di setup ricompare dopo 45 secondi. Per riaprirla manualmente, tieni premuto BOOT per 5 secondi mentre la scheda e accesa.</small>
+</main><script>
+const fields=['ssid','wifi_password','mqtt_uri','mqtt_user','mqtt_password'];let token='';
+const el=id=>document.getElementById(id);const status=el('status');
+fetch('/api/config',{cache:'no-store'}).then(async r=>{if(!r.ok)throw Error('Impossibile caricare la configurazione');const d=await r.json();for(const k of ['ssid','mqtt_uri','mqtt_user'])el(k).value=d[k];token=d.token;el('save').disabled=false;status.textContent='Pronto. Le password salvate non vengono mostrate.';}).catch(e=>{status.textContent=e.message+'. Ricarica la pagina.';});
+el('form').addEventListener('submit',async e=>{e.preventDefault();el('save').disabled=true;status.textContent='Salvataggio...';const data={token};for(const k of fields)data[k]=el(k).value;for(const k of ['wifi_open','mqtt_clear_password'])data[k]=el(k).checked;try{const r=await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const text=await r.text();if(!r.ok)throw Error(text);status.textContent=text;for(const k of ['wifi_password','mqtt_password'])el(k).value='';}catch(err){status.textContent='Salvataggio non confermato: '+err.message+'. Se la scheda si e riavviata, attendi e verifica la connessione prima di riprovare.';el('save').disabled=false;}});
+</script></html>
