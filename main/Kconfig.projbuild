@@ -1,0 +1,25 @@
+menu "Centrale termica"
+config CT_WIFI_SSID
+    string "SSID Wi-Fi"
+    default ""
+config CT_WIFI_PASSWORD
+    string "Password Wi-Fi"
+    default ""
+config CT_MQTT_URI
+    string "Broker MQTT (mqtt://indirizzo:1883)"
+    default "mqtt://192.168.1.10:1883"
+config CT_MQTT_USER
+    string "Utente MQTT"
+    default ""
+config CT_MQTT_PASSWORD
+    string "Password MQTT"
+    default ""
+config CT_GPIO
+    int "GPIO dati 1-Wire (verificare sulla scheda)"
+    range 0 48
+    default 4
+config CT_PERIOD
+    int "Intervallo letture (secondi)"
+    range 5 3600
+    default 15
+endmenu
