@@ -14,11 +14,27 @@ config CT_MQTT_USER
 config CT_MQTT_PASSWORD
     string "Password MQTT"
     default ""
+config CT_SETUP_AP_PASSWORD
+    string "Password fissa rete AP di setup (8-63 caratteri)"
+    default "CentraleSetup2026"
+    help
+        Resta uguale dopo riavvio, reset configurazione ed erase-flash.
+        Modificandola occorre rigenerare il QR Wi-Fi stampato.
 config CT_SETUP_BUTTON_GPIO
-    int "GPIO pulsante setup attivo basso (-1 disabilita)"
+    int "GPIO pulsante AP/reset attivo basso (-1 disabilita)"
     range -1 48
     default 0 if IDF_TARGET_ESP32
+    default 10 if IDF_TARGET_ESP32C6
     default 9
+config CT_RGB_GPIO
+    int "GPIO LED RGB WS2812 (-1 disabilita)"
+    range -1 48
+    default 8 if IDF_TARGET_ESP32C6
+    default -1
+config CT_RGB_BRIGHTNESS
+    int "Luminosita LED RGB (1-255)"
+    range 1 255
+    default 16
 config CT_GPIO
     int "GPIO dati 1-Wire (verificare sulla scheda)"
     range 0 48

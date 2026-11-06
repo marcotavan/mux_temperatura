@@ -17,6 +17,8 @@
 #include "onewire_bus.h"
 #include "ds18b20.h"
 #include "setup.h"
+#include "reconnect.h"
+#include "esp_ota_ops.h"
 
 #define MAX_SENSORS 8
 #define MQTT_UP BIT0
@@ -70,7 +72,7 @@ static void discovery(const sensor_t *s)
     cJSON_AddStringToObject(device, "name", node);
     cJSON_AddStringToObject(device, "manufacturer", "DIY");
     cJSON_AddStringToObject(device, "model", CONFIG_IDF_TARGET);
-    cJSON_AddStringToObject(device, "sw_version", "0.1.0");
+    cJSON_AddStringToObject(device, "sw_version", esp_app_get_description()->version);
     char *json = cJSON_PrintUnformatted(root);
     if (json) { publish(topic, json, true); cJSON_free(json); }
     cJSON_Delete(root);
@@ -79,20 +81,23 @@ static void discovery(const sensor_t *s)
 static void mqtt_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     if (id == MQTT_EVENT_CONNECTED) {
+        ct_setup_mqtt_connected(true);
         xEventGroupSetBits(events, MQTT_UP);
         ESP_LOGI(TAG, "MQTT connesso");
     } else if (id == MQTT_EVENT_DISCONNECTED) {
+        ct_setup_mqtt_connected(false);
         xEventGroupClearBits(events, MQTT_UP);
     }
 }
 
 static void wifi_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
-    if (base == WIFI_EVENT && id == WIFI_EVENT_STA_START && settings.ssid[0]) esp_wifi_connect();
-    if (base == WIFI_EVENT && id == WIFI_EVENT_STA_DISCONNECTED) {
+    ct_reconnect_event(base, id);
+    if ((base == WIFI_EVENT && (id == WIFI_EVENT_STA_DISCONNECTED || id == WIFI_EVENT_STA_STOP)) ||
+        (base == IP_EVENT && id == IP_EVENT_STA_LOST_IP)) {
         ct_setup_wifi_connected(false);
+        ct_setup_mqtt_connected(false);
         xEventGroupClearBits(events, MQTT_UP | WIFI_UP);
-        if (settings.ssid[0]) esp_wifi_connect();
     }
     if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
         ct_setup_wifi_connected(true);
@@ -170,7 +175,8 @@ void app_main(void)
     wifi_init_config_t wifi_init = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&wifi_init));
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_event, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, wifi_event, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, ESP_EVENT_ANY_ID, wifi_event, NULL));
+    ct_reconnect_init(settings.ssid[0] != 0);
     wifi_config_t wifi = {};
     if (strlen(settings.ssid) > sizeof(wifi.sta.ssid) ||
         strlen(settings.wifi_password) > sizeof(wifi.sta.password)) {
@@ -200,6 +206,7 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt, ESP_EVENT_ANY_ID, mqtt_event, NULL));
     bool mqtt_started = false;
     onewire_bus_handle_t bus = create_bus();
+    bool boot_checked = false;
     TickType_t wake = xTaskGetTickCount();
     while (true) {
         if (!mqtt_started && (xEventGroupGetBits(events) & WIFI_UP)) {
@@ -238,6 +245,15 @@ void app_main(void)
             }
         }
         if (recover) recover_bus(&bus);
+        if (!boot_checked) {
+            esp_ota_img_states_t state;
+            const esp_partition_t *running = esp_ota_get_running_partition();
+            if (running && esp_ota_get_state_partition(running, &state) == ESP_OK && state == ESP_OTA_IMG_PENDING_VERIFY) {
+                ESP_ERROR_CHECK(esp_ota_mark_app_valid_cancel_rollback());
+                ESP_LOGI(TAG, "Avvio nuovo firmware OTA confermato");
+            }
+            boot_checked = true;
+        }
         xTaskDelayUntil(&wake, pdMS_TO_TICKS(CONFIG_CT_PERIOD * 1000));
     }
 }

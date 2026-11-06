@@ -15,3 +15,4 @@ void ct_settings_load(ct_settings_t *settings);
 // Call after Wi-Fi start; a task watches BOOT and connection timeout.
 void ct_setup_init(bool has_ssid);
 void ct_setup_wifi_connected(bool connected);
+void ct_setup_mqtt_connected(bool connected);
