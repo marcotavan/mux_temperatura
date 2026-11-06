@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1273" viewBox="0 0 1800 1273">
+<rect width="100%" height="100%" fill="white"/>
+<text x="60" y="38" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="37" font-weight="700" fill="#172b3a">ESP32 Relay X4 · mappa fisica dei pin</text>
+<text x="60" y="96" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#536777">VISTA RETRO: lato saldature, sezione alimentazione a destra, morsetti dei relè in basso</text>
+<polyline points="60,145 1740,145" fill="none" stroke="#c7d3dc" stroke-width="2" stroke-linejoin="round"/>
+<text x="60" y="1227" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">mux_temperatura · firmware 0.3.0 · 6 novembre 2026</text>
+<text x="1740" y="1227" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">2 / 2</text>
+<text x="60" y="171" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">A / B, righe 1–10 e L / R sono riferimenti di questo disegno; non sono numeri stampati sulla scheda.</text>
+<rect x="60" y="230" width="790" height="550" fill="#f5f8fa" stroke="#c7d3dc" stroke-width="2"/>
+<text x="85" y="248" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#172b3a">A · connettore a sinistra nella foto</text>
+<text x="387" y="291" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">L</text>
+<text x="467" y="291" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">R</text>
+<text x="88" y="326" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r1</text>
+<circle cx="387" cy="340" r="10" fill="white" stroke="#7952a0" stroke-width="2"/>
+<text x="330" y="324" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#7952a0">G23</text>
+<circle cx="467" cy="340" r="10" fill="white" stroke="#273b4a" stroke-width="2"/>
+<text x="525" y="324" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#273b4a">GND</text>
+<text x="88" y="369" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r2</text>
+<circle cx="387" cy="383" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="330" y="367" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">TX0</text>
+<circle cx="467" cy="383" r="10" fill="white" stroke="#b86609" stroke-width="2"/>
+<text x="525" y="367" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#b86609">G22</text>
+<text x="88" y="412" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r3</text>
+<circle cx="387" cy="426" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="330" y="410" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G21</text>
+<circle cx="467" cy="426" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="525" y="410" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">RX0</text>
+<text x="88" y="455" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r4</text>
+<circle cx="387" cy="469" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="330" y="453" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G19</text>
+<circle cx="467" cy="469" r="10" fill="white" stroke="#273b4a" stroke-width="2"/>
+<text x="525" y="453" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#273b4a">GND</text>
+<text x="88" y="498" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r5</text>
+<circle cx="387" cy="512" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="330" y="496" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G5</text>
+<circle cx="467" cy="512" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="525" y="496" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G18</text>
+<text x="88" y="541" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r6</text>
+<circle cx="387" cy="555" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="330" y="539" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G16</text>
+<circle cx="467" cy="555" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="525" y="539" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G17</text>
+<text x="88" y="584" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r7</text>
+<circle cx="387" cy="598" r="10" fill="white" stroke="#175fa2" stroke-width="2"/>
+<text x="330" y="582" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#175fa2">G0</text>
+<circle cx="467" cy="598" r="10" fill="white" stroke="#087746" stroke-width="2"/>
+<text x="525" y="582" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#087746">G4</text>
+<text x="88" y="627" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r8</text>
+<circle cx="387" cy="641" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="330" y="625" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G15</text>
+<circle cx="467" cy="641" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="525" y="625" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G2</text>
+<text x="88" y="670" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r9</text>
+<circle cx="387" cy="684" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="330" y="668" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">SD0</text>
+<circle cx="467" cy="684" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="525" y="668" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">SD1</text>
+<text x="88" y="713" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r10</text>
+<circle cx="387" cy="727" r="10" fill="white" stroke="#bb303a" stroke-width="2"/>
+<text x="330" y="711" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#bb303a">3V3</text>
+<circle cx="467" cy="727" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="525" y="711" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">CLK</text>
+<text x="85" y="795" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#536777">Gxx = GPIOxx; leggere le colonne dal lato posteriore.</text>
+<rect x="950" y="230" width="790" height="550" fill="#f5f8fa" stroke="#c7d3dc" stroke-width="2"/>
+<text x="975" y="248" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#172b3a">B · connettore centrale nella foto</text>
+<text x="1277" y="291" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">L</text>
+<text x="1357" y="291" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">R</text>
+<text x="978" y="326" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r1</text>
+<circle cx="1277" cy="340" r="10" fill="white" stroke="#273b4a" stroke-width="2"/>
+<text x="1220" y="324" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#273b4a">GND</text>
+<circle cx="1357" cy="340" r="10" fill="white" stroke="#bb303a" stroke-width="2"/>
+<text x="1415" y="324" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#bb303a">3V3</text>
+<text x="978" y="369" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r2</text>
+<circle cx="1277" cy="383" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1220" y="367" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">EN</text>
+<circle cx="1357" cy="383" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1415" y="367" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">SVP</text>
+<text x="978" y="412" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r3</text>
+<circle cx="1277" cy="426" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1220" y="410" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">SVN</text>
+<circle cx="1357" cy="426" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1415" y="410" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G34</text>
+<text x="978" y="455" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r4</text>
+<circle cx="1277" cy="469" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1220" y="453" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G35</text>
+<circle cx="1357" cy="469" r="10" fill="white" stroke="#77512c" stroke-width="2"/>
+<text x="1415" y="453" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#77512c">G32</text>
+<text x="978" y="498" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r5</text>
+<circle cx="1277" cy="512" r="10" fill="white" stroke="#77512c" stroke-width="2"/>
+<text x="1220" y="496" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#77512c">G33</text>
+<circle cx="1357" cy="512" r="10" fill="white" stroke="#77512c" stroke-width="2"/>
+<text x="1415" y="496" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#77512c">G25</text>
+<text x="978" y="541" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r6</text>
+<circle cx="1277" cy="555" r="10" fill="white" stroke="#77512c" stroke-width="2"/>
+<text x="1220" y="539" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#77512c">G26</text>
+<circle cx="1357" cy="555" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1415" y="539" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G27</text>
+<text x="978" y="584" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r7</text>
+<circle cx="1277" cy="598" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1220" y="582" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G14</text>
+<circle cx="1357" cy="598" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1415" y="582" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G12</text>
+<text x="978" y="627" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r8</text>
+<circle cx="1277" cy="641" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1220" y="625" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">G13</text>
+<circle cx="1357" cy="641" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1415" y="625" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">SD2</text>
+<text x="978" y="670" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r9</text>
+<circle cx="1277" cy="684" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1220" y="668" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">SD3</text>
+<circle cx="1357" cy="684" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1415" y="668" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">CMD</text>
+<text x="978" y="713" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#536777">r10</text>
+<circle cx="1277" cy="727" r="10" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1220" y="711" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="25" font-weight="400" fill="#536777">5V</text>
+<circle cx="1357" cy="727" r="10" fill="white" stroke="#273b4a" stroke-width="2"/>
+<text x="1415" y="711" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#273b4a">GND</text>
+<text x="975" y="795" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#536777">Gxx = GPIOxx; leggere le colonne dal lato posteriore.</text>
+<text x="60" y="840" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#172b3a">COLLEGAMENTI PRINCIPALI</text>
+<text x="60" y="881" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#172b3a">Sonde: GPIO4 = A7-R   ·   +3V3 = A10-L / B1-R   ·   GND = A1-R / A4-R / B10-R</text>
+<text x="60" y="920" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#172b3a">Flussostato: GPIO22 = A2-R verso GND   ·   Pulsante: GPIO0 = A7-L verso GND</text>
+<text x="60" y="959" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#172b3a">GPIO23 = A1-L: LED di stato documentato. D13/D14: assegnazione da verificare col tester.</text>
+<text x="60" y="1012" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#77512c">MORSETTI RELÈ · VISTA FRONTALE, lato componenti, come nella foto Amazon</text>
+<rect x="60" y="1054" width="400" height="134" fill="#f5f8fa" stroke="#536777" stroke-width="2"/>
+<text x="260" y="1067" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#536777">Relè 1 · GPIO32</text>
+<circle cx="125" cy="1125" r="9" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="125" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">NO1</text>
+<circle cx="255" cy="1125" r="9" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="255" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">COM1</text>
+<circle cx="385" cy="1125" r="9" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="385" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">NC1</text>
+<rect x="485" y="1054" width="400" height="134" fill="#f5f8fa" stroke="#536777" stroke-width="2"/>
+<text x="685" y="1067" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#536777">Relè 2 · GPIO33</text>
+<circle cx="550" cy="1125" r="9" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="550" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">NO2</text>
+<circle cx="680" cy="1125" r="9" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="680" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">COM2</text>
+<circle cx="810" cy="1125" r="9" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="810" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">NC2</text>
+<rect x="910" y="1054" width="400" height="134" fill="#f5f8fa" stroke="#536777" stroke-width="2"/>
+<text x="1110" y="1067" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#536777">Relè 3 · GPIO25</text>
+<circle cx="975" cy="1125" r="9" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="975" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">NO3</text>
+<circle cx="1105" cy="1125" r="9" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1105" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">COM3</text>
+<circle cx="1235" cy="1125" r="9" fill="white" stroke="#536777" stroke-width="2"/>
+<text x="1235" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">NC3</text>
+<rect x="1335" y="1054" width="400" height="134" fill="#fffaf2" stroke="#77512c" stroke-width="2"/>
+<text x="1535" y="1067" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#77512c">Relè 4 · GPIO26</text>
+<circle cx="1400" cy="1125" r="9" fill="white" stroke="#77512c" stroke-width="2"/>
+<text x="1400" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#77512c">NO4</text>
+<circle cx="1530" cy="1125" r="9" fill="white" stroke="#77512c" stroke-width="2"/>
+<text x="1530" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#77512c">COM4</text>
+<circle cx="1660" cy="1125" r="9" fill="white" stroke="#77512c" stroke-width="2"/>
+<text x="1660" y="1150" dominant-baseline="text-before-edge" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#77512c">NC4</text>
+<text x="60" y="1197" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="19" font-weight="400" fill="#77512c">Girando la scheda l&#x27;ordine si specchia: usare sempre le sigle COM4 / NO4 serigrafate sul fronte.</text>
+</svg>

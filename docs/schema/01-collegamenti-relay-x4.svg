@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1273" viewBox="0 0 1800 1273">
+<rect width="100%" height="100%" fill="white"/>
+<text x="60" y="38" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="37" font-weight="700" fill="#172b3a">ESP32 Relay X4 · schema dei collegamenti</text>
+<text x="60" y="96" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="400" fill="#536777">Bus sonde unico · flussostato a contatto pulito · separazione verso la PDC tramite relè</text>
+<polyline points="60,145 1740,145" fill="none" stroke="#c7d3dc" stroke-width="2" stroke-linejoin="round"/>
+<text x="60" y="1227" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">mux_temperatura · firmware 0.3.0 · 6 novembre 2026</text>
+<text x="1740" y="1227" dominant-baseline="text-before-edge" text-anchor="end" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">1 / 2</text>
+<rect x="60" y="190" width="500" height="970" fill="#f3f7fa" stroke="#c7d3dc" stroke-width="2"/>
+<text x="90" y="215" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#172b3a">SCHEDA ESP32 RELAY X4</text>
+<text x="90" y="260" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="400" fill="#536777">Posizioni fisiche dei pin: pagina 2</text>
+<text x="90" y="326" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#bb303a">3V3</text>
+<text x="90" y="358" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">A10-L oppure B1-R</text>
+<circle cx="560" cy="370" r="7" fill="#bb303a" stroke="#bb303a" stroke-width="2"/>
+<text x="90" y="406" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#087746">GPIO4 · DQ sonde</text>
+<text x="90" y="438" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">A7-R</text>
+<circle cx="560" cy="450" r="7" fill="#087746" stroke="#087746" stroke-width="2"/>
+<text x="90" y="486" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#273b4a">GND</text>
+<text x="90" y="518" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">A1-R / A4-R / B10-R</text>
+<circle cx="560" cy="530" r="7" fill="#273b4a" stroke="#273b4a" stroke-width="2"/>
+<text x="90" y="656" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#b86609">GPIO22 · ingresso</text>
+<text x="90" y="688" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">A2-R · da verificare sul proprio esemplare</text>
+<circle cx="560" cy="700" r="7" fill="#b86609" stroke="#b86609" stroke-width="2"/>
+<text x="90" y="856" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#175fa2">GPIO0 · pulsante</text>
+<text x="90" y="888" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">A7-L · pulsante BOOT già presente</text>
+<circle cx="560" cy="900" r="7" fill="#175fa2" stroke="#175fa2" stroke-width="2"/>
+<text x="90" y="570" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#7952a0">LED di stato integrato → GPIO23</text>
+<text x="90" y="600" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#536777">Secondo LED extra: alimentazione presunta;</text>
+<text x="90" y="624" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#536777">associazione D13/D14 ancora da verificare.</text>
+<rect x="1120" y="230" width="620" height="355" fill="#f5fbf7" stroke="#c7d3dc" stroke-width="2"/>
+<text x="1150" y="252" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="#087746">SONDE DS18B20 · S1 … S8</text>
+<text x="1150" y="294" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#172b3a">Ogni sonda sugli stessi tre segnali</text>
+<polyline points="560,370 1160,370" fill="none" stroke="#bb303a" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="1160" cy="370" r="7" fill="#bb303a" stroke="#bb303a" stroke-width="2"/>
+<text x="1190" y="355" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#bb303a">VDD  +3,3 V</text>
+<polyline points="560,450 1160,450" fill="none" stroke="#087746" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="1160" cy="450" r="7" fill="#087746" stroke="#087746" stroke-width="2"/>
+<text x="1190" y="435" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#087746">DQ  comune a tutte le sonde</text>
+<polyline points="560,530 1160,530" fill="none" stroke="#273b4a" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="1160" cy="530" r="7" fill="#273b4a" stroke="#273b4a" stroke-width="2"/>
+<text x="1190" y="515" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#273b4a">GND  comune</text>
+<polyline points="800,370 800,391" fill="none" stroke="#bb303a" stroke-width="3" stroke-linejoin="round"/>
+<rect x="790" y="391" width="20" height="38" fill="white" stroke="#172b3a" stroke-width="3"/>
+<polyline points="800,429 800,450" fill="none" stroke="#087746" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="800" cy="370" r="6" fill="#bb303a" stroke="#bb303a" stroke-width="2"/>
+<circle cx="800" cy="450" r="6" fill="#087746" stroke="#087746" stroke-width="2"/>
+<text x="830" y="391" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#172b3a">4,7 kΩ</text>
+<text x="830" y="422" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">una sola per bus</text>
+<text x="1150" y="552" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="17" font-weight="400" fill="#536777">Pin delle sonde da identificare: non affidarsi ai colori.</text>
+<polyline points="940,530 940,960" fill="none" stroke="#273b4a" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="940" cy="530" r="6" fill="#273b4a" stroke="#273b4a" stroke-width="2"/>
+<rect x="1120" y="620" width="620" height="170" fill="white" stroke="#c7d3dc" stroke-width="2"/>
+<text x="1150" y="639" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#b86609">FLUSSOSTATO · contatto pulito</text>
+<polyline points="560,700 1260,700" fill="none" stroke="#b86609" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="1260" cy="700" r="6" fill="white" stroke="#b86609" stroke-width="2"/>
+<polyline points="1267,700 1482,672" fill="none" stroke="#b86609" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="1510" cy="700" r="6" fill="white" stroke="#b86609" stroke-width="2"/>
+<polyline points="1517,700 1700,700 1700,770 940,770" fill="none" stroke="#273b4a" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="940" cy="770" r="6" fill="#273b4a" stroke="#273b4a" stroke-width="2"/>
+<text x="1150" y="730" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#536777">Chiuso: GPIO22 a GND. Pull-up interna abilitata.</text>
+<rect x="1120" y="820" width="620" height="170" fill="white" stroke="#c7d3dc" stroke-width="2"/>
+<text x="1150" y="839" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#175fa2">PULSANTE AP / RESET</text>
+<polyline points="560,900 1260,900" fill="none" stroke="#175fa2" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="1260" cy="900" r="6" fill="white" stroke="#175fa2" stroke-width="2"/>
+<polyline points="1267,900 1482,872" fill="none" stroke="#175fa2" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="1510" cy="900" r="6" fill="white" stroke="#175fa2" stroke-width="2"/>
+<polyline points="1517,900 1700,900 1700,960 940,960" fill="none" stroke="#273b4a" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="940" cy="960" r="6" fill="#273b4a" stroke="#273b4a" stroke-width="2"/>
+<text x="1150" y="930" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="18" font-weight="400" fill="#536777">5–15 s + rilascio: AP. Da 15 s + rilascio: reset.</text>
+<polyline points="921,975 959,975" fill="none" stroke="#273b4a" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="928,984 952,984" fill="none" stroke="#273b4a" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="935,993 945,993" fill="none" stroke="#273b4a" stroke-width="3" stroke-linejoin="round"/>
+<rect x="90" y="1008" width="440" height="132" fill="#fffaf2" stroke="#77512c" stroke-width="2"/>
+<text x="110" y="1022" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#77512c">RELÈ FISICO 4 · GPIO26</text>
+<text x="110" y="1066" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#77512c">COM4</text>
+<text x="110" y="1110" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#77512c">NO4  (NC4 non usato)</text>
+<circle cx="560" cy="1070" r="7" fill="#77512c" stroke="#77512c" stroke-width="2"/>
+<circle cx="560" cy="1130" r="7" fill="#77512c" stroke="#77512c" stroke-width="2"/>
+<rect x="1120" y="1010" width="620" height="150" fill="#fffaf2" stroke="#77512c" stroke-width="2"/>
+<text x="1150" y="1024" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#77512c">INGRESSO FLUSSOSTATO DELLA PDC</text>
+<polyline points="350,1070 560,1070 1160,1070" fill="none" stroke="#77512c" stroke-width="4" stroke-linejoin="round"/>
+<polyline points="420,1130 560,1130 1160,1130" fill="none" stroke="#77512c" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="1160" cy="1070" r="6" fill="#77512c" stroke="#77512c" stroke-width="2"/>
+<text x="1190" y="1056" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#172b3a">Morsetto ingresso 1</text>
+<circle cx="1160" cy="1130" r="6" fill="#77512c" stroke="#77512c" stroke-width="2"/>
+<text x="1190" y="1116" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="22" font-weight="400" fill="#172b3a">Morsetto ingresso 2</text>
+<text x="620" y="1176" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="20" font-weight="400" fill="#77512c">Solo contatti COM/NO verso PDC: nessun collegamento di massa tramite questi due fili.</text>
+<text x="60" y="1201" dominant-baseline="text-before-edge" text-anchor="start" font-family="Arial,sans-serif" font-size="16" font-weight="400" fill="#536777">Punto pieno = giunzione. Incrocio senza punto = fili non collegati.</text>
+</svg>

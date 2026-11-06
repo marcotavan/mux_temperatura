@@ -13,7 +13,8 @@ config CT_FLOW_GPIO
     default 22 if CT_BOARD_4RELAY
     default -1
     help
-        GPIO22 e libero nel pinout Relay X4; il LED integrato e su GPIO23.
+        GPIO22 e assegnato come ingresso. Il LED di stato documentato e su GPIO23;
+        verificare i collegamenti dei due LED extra sulla propria revisione.
         Richiede un ingresso con pull-up e un contatto pulito verso GND.
 config CT_FLOW_RELAY
     int "Numero rele che replica il flussostato (1-4)"

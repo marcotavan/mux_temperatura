@@ -7,6 +7,12 @@ e stato consultato come riferimento e non e stato modificato.
 
 ## Collegamenti
 
+Disponibili lo [schema dei collegamenti e la mappa dei pin in PDF](schema/schema-relay-x4.pdf)
+e le [note sulle viste fronte/retro e sui due LED extra](schema/README.md).
+GPIO23 e documentato per il LED di stato; il collegamento dell'altro LED extra
+resta da verificare elettricamente. Anche GPIO22 va controllato sulla propria
+revisione prima di utilizzarlo come ingresso del flussostato.
+
 | Funzione | GPIO / morsetti |
 | --- | --- |
 | DQ di tutte le DS18B20 | GPIO4, pull-up esterna 4,7 kohm verso 3V3 |
@@ -102,6 +108,19 @@ uscita rele fisico4/GPIO26 e LED23. Binario applicativo da 932448 byte,
 con 53% libero nello slot OTA. Superati nove test host, inclusi quattro casi
 di replica flussostato. Non e stato effettuato un caricamento sulla Relay X4;
 le verifiche sul cablaggio reale restano da eseguire.
+
+Verifica aggiuntiva su scheda di sviluppo ESP32-WROOM su COM42, senza rele o
+sonde collegati: flash identificata da 4 MiB; caricamento 0.3.0 e avvio riusciti;
+GPIO22 aperto letto come aperto; un ponticello tra GPIO22 e GND ha prodotto nei
+log il comando ON dopo 50 ms, seguito da OFF all'apertura. Durante la manipolazione
+del ponticello si sono viste commutazioni dovute alle interruzioni del contatto.
+Dopo riavvio, GPIO22 aperto e comando OFF. Questa prova non verifica un rele
+fisico, i morsetti verso la PDC o il flussostato reale. La scheda non si e collegata
+alla rete configurata e ha aperto l'AP `Centrale-Setup-52C8C4`; l'etichetta QR e
+specifica di questa scheda di sviluppo, non della Relay X4 installata.
+Con una DS18B20 collegata a GPIO4 e il solo pull-up interno, sono state lette
+tre temperature consecutive: 25,69; 25,75; 25,81 °C. La prova e preliminare:
+per il collegamento definitivo resta necessaria la resistenza esterna da 4,7 kohm.
 
 Per una nuova configurazione:
 
