@@ -329,8 +329,40 @@ static void start_ap(void)
     ESP_LOGI(TAG, "AP: %s | password setup: %s | pagina http://192.168.4.1", cfg.ap.ssid, password);
 }
 
+static void status_led_init(void)
+{
+#if CONFIG_CT_STATUS_LED_GPIO >= 0
+    const int pin = CONFIG_CT_STATUS_LED_GPIO;
+    if (pin < 0) return;
+    ESP_ERROR_CHECK(gpio_set_level(pin, !CONFIG_CT_STATUS_LED_ACTIVE_LEVEL));
+    gpio_config_t cfg = { .pin_bit_mask = 1ULL << pin, .mode = GPIO_MODE_OUTPUT };
+    ESP_ERROR_CHECK(gpio_config(&cfg));
+#endif
+}
+
+static void status_led_update(int64_t now, bool ap, int64_t held_ms)
+{
+    const int pin = CONFIG_CT_STATUS_LED_GPIO;
+    if (pin < 0) return;
+    bool on;
+    if (atomic_load(&ota_busy)) on = (now / 50000) % 2 == 0;
+    else if (held_ms >= 15000) on = (now / 100000) % 2 == 0;
+    else if (held_ms >= 5000) on = (now / 250000) % 2 == 0;
+    else if (ap) { int64_t phase = now % 2000000; on = phase < 100000 || (phase >= 200000 && phase < 300000); }
+    else if (!atomic_load(&wifi_connected)) on = now % 2000000 < 100000;
+    else if (!atomic_load(&mqtt_connected)) on = (now / 500000) % 2 == 0;
+    else on = true;
+    static int previous = -1;
+    int level = on ? CONFIG_CT_STATUS_LED_ACTIVE_LEVEL : !CONFIG_CT_STATUS_LED_ACTIVE_LEVEL;
+    if (level != previous) {
+        ESP_ERROR_CHECK(gpio_set_level(pin, level));
+        previous = level;
+    }
+}
+
 static void rgb_init(void)
 {
+#if CONFIG_CT_RGB_GPIO >= 0
     const int pin = CONFIG_CT_RGB_GPIO;
     if (pin < 0) return;
     if (!GPIO_IS_VALID_OUTPUT_GPIO(pin) || pin == CONFIG_CT_GPIO || pin == CONFIG_CT_SETUP_BUTTON_GPIO) {
@@ -342,10 +374,12 @@ static void rgb_init(void)
     led_strip_rmt_config_t rmt = { .resolution_hz = 10000000 };
     esp_err_t err = led_strip_new_rmt_device(&config, &rmt, &rgb);
     if (err != ESP_OK) { rgb = NULL; ESP_LOGW(TAG, "LED RGB: %s", esp_err_to_name(err)); }
+#endif
 }
 
 static void rgb_update(int64_t now, bool ap, int64_t held_ms)
 {
+    status_led_update(now, ap, held_ms);
     if (!rgb) return;
     unsigned r = 0, g = 0, b = 0, level = CONFIG_CT_RGB_BRIGHTNESS;
     if (atomic_load(&ota_busy)) { r = b = level; }
@@ -386,14 +420,20 @@ static void setup_task(void *arg)
     bool ap_active = false;
     int64_t offline_since = esp_timer_get_time();
     ct_button_t press = {0};
+    status_led_init();
     rgb_init();
     const int pin = CONFIG_CT_SETUP_BUTTON_GPIO;
-    bool button = pin >= 0 && GPIO_IS_VALID_GPIO(pin) && pin != CONFIG_CT_GPIO && pin != CONFIG_CT_RGB_GPIO;
+    bool button = false;
+#if CONFIG_CT_SETUP_BUTTON_GPIO >= 0
+    button = GPIO_IS_VALID_GPIO(pin) && pin != CONFIG_CT_GPIO && pin != CONFIG_CT_RGB_GPIO;
     if (button) {
         gpio_config_t cfg = { .pin_bit_mask = 1ULL << pin, .mode = GPIO_MODE_INPUT,
             .pull_up_en = GPIO_PULLUP_ENABLE, .intr_type = GPIO_INTR_DISABLE };
         ESP_ERROR_CHECK(gpio_config(&cfg));
     } else ESP_LOGW(TAG, "Pulsante setup disabilitato o GPIO non utilizzabile");
+#else
+    ESP_LOGW(TAG, "Pulsante setup disabilitato");
+#endif
     while (true) {
         int64_t now = esp_timer_get_time();
         if (atomic_load(&reboot_pending)) { vTaskDelay(pdMS_TO_TICKS(1200)); esp_restart(); }

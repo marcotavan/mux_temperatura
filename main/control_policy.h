@@ -48,3 +48,20 @@ static inline ct_button_action_t ct_button_update(ct_button_t *p, bool pressed, 
     }
     return action;
 }
+
+typedef struct {
+    bool pending, closed;
+    int64_t since;
+} ct_flow_follow_t;
+
+// Opening is never delayed; only a sustained closure can energize the relay.
+static inline bool ct_flow_follow_update(ct_flow_follow_t *p, bool raw_closed, int64_t now, unsigned close_ms)
+{
+    if (!raw_closed) {
+        p->pending = p->closed = false;
+        return false;
+    }
+    if (!p->pending) { p->pending = true; p->since = now; }
+    if (now - p->since >= close_ms) p->closed = true;
+    return p->closed;
+}

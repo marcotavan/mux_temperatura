@@ -1,4 +1,46 @@
 menu "Centrale termica"
+config CT_BOARD_4RELAY
+    bool "Scheda ESP32 Relay X4 (rele 1-4 su GPIO 32,33,25,26)"
+    depends on IDF_TARGET_ESP32
+    default y
+    help
+        Pinout della scheda ESP32 Relay X4 documentata da ESPHome Devices.
+        Il rele selezionato segue solo il contatto pulito del flussostato.
+        Gli altri rele restano spenti; nessuna forzatura o sequenza di avvio.
+config CT_FLOW_GPIO
+    int "GPIO contatto flussostato verso GND (-1 disabilita)"
+    range -1 48
+    default 22 if CT_BOARD_4RELAY
+    default -1
+    help
+        GPIO22 e libero nel pinout Relay X4; il LED integrato e su GPIO23.
+        Richiede un ingresso con pull-up e un contatto pulito verso GND.
+config CT_FLOW_RELAY
+    int "Numero rele che replica il flussostato (1-4)"
+    depends on CT_BOARD_4RELAY
+    range 1 4
+    default 4
+    help
+        Il vecchio firmware usava GPIO26: sulla scheda questo e il rele 4,
+        anche se nel vecchio array era l'indice 0.
+config CT_RELAY_ACTIVE_LEVEL
+    int "Livello GPIO di attivazione rele (0/1, verificare scheda)"
+    depends on CT_BOARD_4RELAY
+    range 0 1
+    default 1
+config CT_FLOW_CLOSE_MS
+    int "Conferma chiusura flussostato (ms, apertura immediata al campionamento)"
+    range 0 1000
+    default 50
+config CT_STATUS_LED_GPIO
+    int "GPIO LED semplice di stato (-1 disabilita)"
+    range -1 48
+    default 23 if CT_BOARD_4RELAY
+    default -1
+config CT_STATUS_LED_ACTIVE_LEVEL
+    int "Livello di accensione LED semplice (0/1)"
+    range 0 1
+    default 1
 config CT_WIFI_SSID
     string "SSID Wi-Fi"
     default ""

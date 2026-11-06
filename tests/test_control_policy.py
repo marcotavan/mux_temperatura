@@ -29,6 +29,10 @@ class Button(ctypes.Structure):
                 ("raw_since", ctypes.c_int64), ("pressed_since", ctypes.c_int64)]
 
 
+class Flow(ctypes.Structure):
+    _fields_ = [("pending", ctypes.c_bool), ("closed", ctypes.c_bool), ("since", ctypes.c_int64)]
+
+
 class ControlPolicyTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -38,18 +42,21 @@ class ControlPolicyTest(unittest.TestCase):
         source.write_text('''#include "control_policy.h"
 unsigned retry(ct_retry_policy_t *p, int64_t now) { return ct_retry_delay(p, now); }
 int button(ct_button_t *p, int pressed, int64_t now) { return ct_button_update(p, pressed != 0, now); }
+int flow(ct_flow_follow_t *p, int closed, int64_t now, unsigned delay) { return ct_flow_follow_update(p, closed != 0, now, delay); }
 ''', encoding="utf-8")
         subprocess.run([str(COMPILER_BIN / "cl.exe"), "/nologo", "/std:c11", "/Zl", "/GS-",
                         "/I" + str(COMPILER_BIN.parents[2] / "include"), "/I" + str(ROOT / "main"),
                         "/c", str(source), "/Fo" + str(path / "policy.obj")], check=True)
         subprocess.run([str(COMPILER_BIN / "link.exe"), "/nologo", "/dll", "/noentry",
-                        "/nodefaultlib", "/export:retry", "/export:button",
+                        "/nodefaultlib", "/export:retry", "/export:button", "/export:flow",
                         f"/out:{path / 'policy.dll'}", str(path / "policy.obj")], check=True)
         cls.dll = ctypes.CDLL(str(path / "policy.dll"))
         cls.dll.retry.argtypes = [ctypes.POINTER(Retry), ctypes.c_int64]
         cls.dll.retry.restype = ctypes.c_uint
         cls.dll.button.argtypes = [ctypes.POINTER(Button), ctypes.c_int, ctypes.c_int64]
         cls.dll.button.restype = ctypes.c_int
+        cls.dll.flow.argtypes = [ctypes.POINTER(Flow), ctypes.c_int, ctypes.c_int64, ctypes.c_uint]
+        cls.dll.flow.restype = ctypes.c_int
 
     @classmethod
     def tearDownClass(cls):
@@ -106,6 +113,29 @@ int button(ct_button_t *p, int pressed, int64_t now) { return ct_button_update(p
         self.assertEqual(self.update(button, True, 16070), 0)
         self.assertEqual(self.update(button, False, 17000), 0)
         self.assertEqual(self.update(button, False, 17050), 2)
+
+    def test_flow_open_at_boot_never_energizes(self):
+        flow = Flow()
+        for now in [0, 100, 13400, 60000]:
+            self.assertEqual(self.dll.flow(ctypes.byref(flow), False, now, 50), 0)
+
+    def test_flow_closed_at_boot_has_no_forced_boot_delay(self):
+        flow = Flow()
+        self.assertEqual(self.dll.flow(ctypes.byref(flow), True, 0, 50), 0)
+        self.assertEqual(self.dll.flow(ctypes.byref(flow), True, 49, 50), 0)
+        self.assertEqual(self.dll.flow(ctypes.byref(flow), True, 50, 50), 1)
+        self.assertEqual(self.dll.flow(ctypes.byref(flow), False, 51, 50), 0)
+
+    def test_flow_bounce_requires_new_sustained_closure(self):
+        flow = Flow()
+        for closed, now, expected in [(True, 100, 0), (True, 130, 0), (False, 140, 0),
+                                      (True, 150, 0), (True, 199, 0), (True, 200, 1), (False, 201, 0)]:
+            self.assertEqual(self.dll.flow(ctypes.byref(flow), closed, now, 50), expected)
+
+    def test_flow_zero_delay_and_long_uptime(self):
+        flow = Flow()
+        self.assertEqual(self.dll.flow(ctypes.byref(flow), True, 2**33, 0), 1)
+        self.assertEqual(self.dll.flow(ctypes.byref(flow), False, 2**33 + 1, 0), 0)
 
 
 if __name__ == "__main__":

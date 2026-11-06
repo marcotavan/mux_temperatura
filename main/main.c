@@ -19,6 +19,7 @@
 #include "setup.h"
 #include "reconnect.h"
 #include "esp_ota_ops.h"
+#include "plant.h"
 
 #define MAX_SENSORS 8
 #define MQTT_UP BIT0
@@ -81,10 +82,12 @@ static void discovery(const sensor_t *s)
 static void mqtt_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     if (id == MQTT_EVENT_CONNECTED) {
+        ct_plant_mqtt_connected(true);
         ct_setup_mqtt_connected(true);
         xEventGroupSetBits(events, MQTT_UP);
         ESP_LOGI(TAG, "MQTT connesso");
     } else if (id == MQTT_EVENT_DISCONNECTED) {
+        ct_plant_mqtt_connected(false);
         ct_setup_mqtt_connected(false);
         xEventGroupClearBits(events, MQTT_UP);
     }
@@ -96,6 +99,7 @@ static void wifi_event(void *arg, esp_event_base_t base, int32_t id, void *data)
     if ((base == WIFI_EVENT && (id == WIFI_EVENT_STA_DISCONNECTED || id == WIFI_EVENT_STA_STOP)) ||
         (base == IP_EVENT && id == IP_EVENT_STA_LOST_IP)) {
         ct_setup_wifi_connected(false);
+        ct_plant_mqtt_connected(false);
         ct_setup_mqtt_connected(false);
         xEventGroupClearBits(events, MQTT_UP | WIFI_UP);
     }
@@ -156,6 +160,7 @@ static void recover_bus(onewire_bus_handle_t *bus)
 
 void app_main(void)
 {
+    ct_plant_gpio_init();
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -204,6 +209,7 @@ void app_main(void)
     mqtt = esp_mqtt_client_init(&mc);
     assert(mqtt);
     ESP_ERROR_CHECK(esp_mqtt_client_register_event(mqtt, ESP_EVENT_ANY_ID, mqtt_event, NULL));
+    ct_plant_start(mqtt, node, availability);
     bool mqtt_started = false;
     onewire_bus_handle_t bus = create_bus();
     bool boot_checked = false;

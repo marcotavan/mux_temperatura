@@ -4,7 +4,14 @@ Per installare il broker sul server Docker seguire la [guida Docker Compose](dep
 
 Firmware ESP-IDF 6.1 per ESP32-WROOM (`esp32`), ESP32-C3 ed ESP32-C6.
 Fino a 8 DS18B20 su un unico bus 1-Wire; letture ogni 15 secondi,
-invio MQTT e discovery Home Assistant. Nessun comando su caldaia o pompe.
+invio MQTT e discovery Home Assistant.
+
+Dalla versione **0.3.0** il target `esp32` include il profilo per la
+[scheda ESP32 Relay X4 gia installata](docs/scheda-4-rele.md): un rele replica
+localmente il contatto pulito del flussostato, mentre gli altri restano OFF.
+Non sono previste forzature di avvio o comandi remoti del rele.
+Stato flussostato e diagnostica di boot vengono inviati a Home Assistant;
+il conteggio dei sei mesi per la pulizia resta interamente in HASS.
 
 ## Preparazione
 
@@ -17,6 +24,10 @@ idf.py menuconfig
 ```
 
 Per WROOM usare `esp32`, per C3 usare `esp32c3`.
+Su `esp32` il profilo Relay X4 e abilitato per default: per una scheda WROOM
+generica disabilitarlo in **Centrale termica > Scheda ESP32 Relay X4**.
+Il [pinout e comportamento Relay X4](docs/scheda-4-rele.md) sostituisce le
+indicazioni C6 per LED, ingresso flussostato e numerazione rele.
 Per C6 il file `sdkconfig.defaults.esp32c6` seleziona flash da 4 MiB,
 la tabella `partitions.csv` con due slot OTA da 1920 KiB e il rollback di avvio.
 Sono adatti sia ESP32-C6-DevKitC-1 sia ESP32-C6-DevKitM-1, con almeno 4 MiB di flash.
@@ -134,8 +145,9 @@ Il **primo caricamento va eseguito via USB** con questa tabella delle partizioni
 bootloader e applicazione (`idf.py -p COM5 flash`). La partizione NVS conserva posizione
 e dimensione della tabella standard precedente; non e richiesto un erase-flash.
 Il firmware precedente con partizione singola non puo acquisire la nuova tabella via OTA.
-Su WROOM/C3 l'OTA richiede di selezionare manualmente la stessa tabella, flash di almeno
-4 MiB e rollback in menuconfig; non viene attivato automaticamente dai loro default.
+Su ESP32 Relay X4 il file `sdkconfig.defaults.esp32` seleziona gia la stessa tabella
+OTA e il rollback; verificare prima la flash reale, di almeno 4 MiB.
+Su C3 queste opzioni restano da selezionare manualmente in menuconfig.
 
 Per gli aggiornamenti successivi:
 
@@ -199,9 +211,10 @@ La discovery viene ripubblicata ogni ciclo per gestire anche il riavvio di Home 
 
 Per le funzioni introdotte nella versione 0.2.0 e verificata la compilazione C6
 con LED RGB, doppia partizione OTA e rollback, incluso il controllo dimensioni.
-I cinque test host eseguono il codice C della politica di backoff e del pulsante:
+La suite attuale comprende nove test host sul codice C di backoff, pulsante e replica flussostato:
 limite e ripartenza del backoff, uptime oltre 32 bit, soglie al rilascio,
-pulsante premuto all'avvio e rimbalzo del contatto. Con MSVC installato:
+pulsante premuto all'avvio e rimbalzo del contatto, piu avvio del flussostato aperto/chiuso,
+conferma di chiusura, apertura senza ritardo e rimbalzi. Con MSVC installato:
 
 ```powershell
 python tests/test_control_policy.py
