@@ -90,6 +90,10 @@ static void mqtt_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         ct_plant_mqtt_connected(false);
         ct_setup_mqtt_connected(false);
         xEventGroupClearBits(events, MQTT_UP);
+    } else if (id == MQTT_EVENT_DATA) {
+        esp_mqtt_event_handle_t event = data;
+        ct_plant_mqtt_data(event->topic, event->topic_len, event->data,
+                           event->data_len, event->retain);
     }
 }
 
@@ -228,6 +232,15 @@ void app_main(void)
         bool recover = conversion == ESP_ERR_TIMEOUT || conversion == ESP_ERR_INVALID_STATE;
         // The driver waits 800 ms for all 12-bit conversions to finish.
         bool connected = (xEventGroupGetBits(events) & MQTT_UP) != 0;
+        ct_probe_snapshot_t probe_snapshot = {
+            .gpio = CONFIG_CT_GPIO,
+            .last_error = conversion != ESP_OK ? conversion : scan_result,
+            .sensor_count = (unsigned)sensor_count,
+            .bus_ok = scan_result == ESP_OK && conversion == ESP_OK,
+            .wifi_connected = (xEventGroupGetBits(events) & WIFI_UP) != 0,
+            .mqtt_connected = connected,
+        };
+        snprintf(probe_snapshot.node, sizeof(probe_snapshot.node), "%s", node);
         if (connected) publish(availability, "online", true);
         for (int i = 0; i < sensor_count; i++) {
             float temperature = NAN;
@@ -237,6 +250,11 @@ void app_main(void)
                 conversion = err; // Do not issue further reads on a potentially stuck channel.
             }
             bool valid = err == ESP_OK && isfinite(temperature) && temperature >= -55 && temperature <= 125;
+            probe_snapshot.sensors[i] = (ct_probe_status_t){
+                .rom = sensors[i].rom,
+                .temperature = valid ? temperature : 0.0f,
+                .valid = valid,
+            };
             if (valid) ESP_LOGI(TAG, "%016" PRIx64 ": %.2f C", sensors[i].rom, temperature);
             else ESP_LOGW(TAG, "%016" PRIx64 ": lettura non valida (%s)", sensors[i].rom, esp_err_to_name(err));
             if (!connected) continue;
@@ -250,6 +268,7 @@ void app_main(void)
                 publish(topic, value, false);
             }
         }
+        ct_setup_probe_status_update(&probe_snapshot);
         if (recover) recover_bus(&bus);
         if (!boot_checked) {
             esp_ota_img_states_t state;

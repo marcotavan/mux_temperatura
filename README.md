@@ -6,12 +6,11 @@ Firmware ESP-IDF 6.1 per ESP32-WROOM (`esp32`), ESP32-C3 ed ESP32-C6.
 Fino a 8 DS18B20 su un unico bus 1-Wire; letture ogni 15 secondi,
 invio MQTT e discovery Home Assistant.
 
-Dalla versione **0.3.0** il target `esp32` include il profilo per la
-[scheda ESP32 Relay X4 gia installata](docs/scheda-4-rele.md): un rele replica
-localmente il contatto pulito del flussostato, mentre gli altri restano OFF.
-Non sono previste forzature di avvio o comandi remoti del rele.
-Stato flussostato e diagnostica di boot vengono inviati a Home Assistant;
-il conteggio dei sei mesi per la pulizia resta interamente in HASS.
+Dalla versione corrente il target `esp32` include il profilo per la
+[scheda ESP32 Relay X4 gia installata](docs/scheda-4-rele.md): i quattro rele
+sono comandabili indipendentemente via MQTT e Home Assistant MQTT discovery.
+Al riavvio restano tutti OFF; i comandi retained vengono ignorati per evitare
+che un vecchio comando li riattivi alla riconnessione.
 
 ## Preparazione
 
@@ -43,6 +42,13 @@ SSID vuoto apre la rete di configurazione; le letture seriali restano disponibil
 MQTT viene avviato dopo l'assegnazione dell'IP Wi-Fi.
 Il GPIO 4 e l'indirizzo del broker sono segnaposto da verificare prima del collegamento.
 Non usare pin occupati da flash, USB, console o periferiche della specifica scheda.
+
+Per la scheda Relay X4, Home Assistant scopre quattro interruttori MQTT.
+In alternativa pubblicare `ON` oppure `OFF` ai topic
+`centrale/<nodo>/relay/1/set` fino a `centrale/<nodo>/relay/4/set`.
+Lo stato viene pubblicato retained su `centrale/<nodo>/relay/<n>/state`.
+Il broker deve limitare la pubblicazione dei topic `/set` ai client autorizzati.
+Il flussostato non viene letto né usato dal firmware.
 
 ```powershell
 idf.py build
@@ -78,13 +84,18 @@ Le impostazioni vengono salvate insieme in NVS, mantenute agli aggiornamenti nor
 del firmware e hanno precedenza sui valori di menuconfig. Un erase-flash completo
 cancella queste impostazioni, ma la password AP resta quella compilata nel firmware.
 
+La pagina diagnostica in sola lettura e disponibile anche durante il funzionamento normale,
+all'indirizzo IP assegnato alla scheda dal router, per i dispositivi della stessa rete locale.
+Mostra sonde, temperatura, stato Wi-Fi/MQTT e topic. Configurazione Wi-Fi/MQTT e caricamento
+firmware restano disponibili soltanto dall'AP WPA2 su `http://192.168.4.1`.
+
 Il setup si apre anche automaticamente senza SSID oppure dopo 45 secondi senza
 connessione Wi-Fi (all'avvio o dopo una disconnessione), permettendo di correggere
 credenziali errate. Resta aperto fino al riavvio; le letture continuano e l'eventuale
 connessione alla rete domestica viene ristabilita dopo l'attivazione AP.
 Una password MQTT errata, da sola, non apre automaticamente il setup:
-usare il pulsante AP/reset per modificarla. La pagina accetta richieste solo sull'indirizzo AP,
-non sull'IP della scheda nella rete domestica.
+usare il pulsante AP/reset per modificarla. Dall'IP domestico non sono esposte operazioni
+di modifica o aggiornamento firmware.
 
 Il pulsante e attivo basso con pull-up interno: GPIO10 esterno su C6,
 GPIO0 (BOOT) sul WROOM e GPIO9 (BOOT) su C3.
@@ -231,9 +242,9 @@ inclusa generazione dei binari e controllo dello spazio nella partizione app.
 Verificato su WROOM via seriale: avvio senza sonde per tre cicli,
 connessione Wi-Fi e MQTT al broker reale, senza timeout RMT o errori di stato.
 Verificati sul WROOM anche apertura dell'AP con pressione BOOT simulata via USB,
-avvio del server setup e rifiuto HTTP 403 delle richieste dall'IP LAN domestico.
-La pagina supporta i socket IPv4 e quelli IPv4 mappati su IPv6 usati da ESP-IDF.
-Confermati dal telefono apertura della pagina e salvataggio della configurazione.
+avvio del server setup e salvataggio della configurazione. La pagina diagnostica LAN
+in sola lettura è stata aggiunta alla build corrente; l'accesso LAN resta da verificare
+sulla scheda dopo il caricamento di questa build.
 Verificati poi via seriale, dopo un ulteriore riavvio, caricamento dei dati NVS,
 riconnessione Wi-Fi e MQTT e assenza dell'AP quando la rete domestica funziona.
 Restano da verificare letture con sonde reali e recupero da guasti del cablaggio.

@@ -5,25 +5,7 @@ config CT_BOARD_4RELAY
     default y
     help
         Pinout della scheda ESP32 Relay X4 documentata da ESPHome Devices.
-        Il rele selezionato segue solo il contatto pulito del flussostato.
-        Gli altri rele restano spenti; nessuna forzatura o sequenza di avvio.
-config CT_FLOW_GPIO
-    int "GPIO contatto flussostato verso GND (-1 disabilita)"
-    range -1 48
-    default 22 if CT_BOARD_4RELAY
-    default -1
-    help
-        GPIO22 e assegnato come ingresso. Il LED di stato documentato e su GPIO23;
-        verificare i collegamenti dei due LED extra sulla propria revisione.
-        Richiede un ingresso con pull-up e un contatto pulito verso GND.
-config CT_FLOW_RELAY
-    int "Numero rele che replica il flussostato (1-4)"
-    depends on CT_BOARD_4RELAY
-    range 1 4
-    default 4
-    help
-        Il vecchio firmware usava GPIO26: sulla scheda questo e il rele 4,
-        anche se nel vecchio array era l'indice 0.
+        Tutti e quattro i rele si comandano indipendentemente tramite MQTT.
 config CT_RELAY_ACTIVE_LEVEL
     int "Livello GPIO di attivazione rele (0/1, verificare scheda)"
     depends on CT_BOARD_4RELAY

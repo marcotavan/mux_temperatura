@@ -31,8 +31,13 @@ static atomic_bool reboot_pending;
 static atomic_bool ota_busy;
 static led_strip_handle_t rgb;
 static char csrf[33];
+static httpd_handle_t web_server;
+static portMUX_TYPE probe_status_mux = portMUX_INITIALIZER_UNLOCKED;
+static ct_probe_snapshot_t probe_status;
 extern const unsigned char setup_html_start[] asm("_binary_setup_html_start");
 extern const unsigned char setup_html_end[] asm("_binary_setup_html_end");
+extern const unsigned char status_html_start[] asm("_binary_status_html_start");
+extern const unsigned char status_html_end[] asm("_binary_status_html_end");
 
 static bool valid_password(const char *s)
 {
@@ -95,6 +100,14 @@ void ct_setup_mqtt_connected(bool connected)
     atomic_store(&mqtt_connected, connected);
 }
 
+void ct_setup_probe_status_update(const ct_probe_snapshot_t *snapshot)
+{
+    if (!snapshot) return;
+    portENTER_CRITICAL(&probe_status_mux);
+    probe_status = *snapshot;
+    portEXIT_CRITICAL(&probe_status_mux);
+}
+
 static uint32_t socket_ipv4(const struct sockaddr_storage *address)
 {
     if (address->ss_family == AF_INET) {
@@ -114,30 +127,83 @@ static uint32_t socket_ipv4(const struct sockaddr_storage *address)
     return 0;
 }
 
-static bool ap_request(httpd_req_t *req)
+static bool request_sockets(httpd_req_t *req, struct sockaddr_storage *local, struct sockaddr_storage *peer)
 {
-    // The HTTP socket also listens on STA: restrict setup to clients addressing the AP.
-    struct sockaddr_storage local = {}, peer = {};
-    socklen_t size = sizeof(local);
-    bool local_ok = getsockname(httpd_req_to_sockfd(req), (struct sockaddr *)&local, &size) == 0;
-    size = sizeof(peer);
-    bool peer_ok = getpeername(httpd_req_to_sockfd(req), (struct sockaddr *)&peer, &size) == 0;
-    if (!local_ok || !peer_ok || socket_ipv4(&local) != inet_addr("192.168.4.1") ||
-        (ntohl(socket_ipv4(&peer)) & 0xffffff00U) != 0xc0a80400U) {
-        httpd_resp_send_err(req, HTTPD_403_FORBIDDEN, "Collegarsi alla rete Wi-Fi di setup");
-        return false;
-    }
+    *local = (struct sockaddr_storage){0};
+    *peer = (struct sockaddr_storage){0};
+    socklen_t size = sizeof(*local);
+    bool local_ok = getsockname(httpd_req_to_sockfd(req), (struct sockaddr *)local, &size) == 0;
+    size = sizeof(*peer);
+    bool peer_ok = getpeername(httpd_req_to_sockfd(req), (struct sockaddr *)peer, &size) == 0;
+    return local_ok && peer_ok;
+}
+
+static bool request_is_setup_ap(const struct sockaddr_storage *local, const struct sockaddr_storage *peer)
+{
+    return socket_ipv4(local) == inet_addr("192.168.4.1") &&
+        (ntohl(socket_ipv4(peer)) & 0xffffff00U) == 0xc0a80400U;
+}
+
+static bool request_is_station_lan(const struct sockaddr_storage *local, const struct sockaddr_storage *peer)
+{
+    esp_netif_t *sta = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    esp_netif_ip_info_t ip = {};
+    if (!sta || esp_netif_get_ip_info(sta, &ip) != ESP_OK || !ip.ip.addr || !ip.netmask.addr) return false;
+    uint32_t local_ip = ntohl(socket_ipv4(local));
+    uint32_t peer_ip = ntohl(socket_ipv4(peer));
+    uint32_t sta_ip = ntohl(ip.ip.addr);
+    uint32_t mask = ntohl(ip.netmask.addr);
+    return local_ip == sta_ip && (peer_ip & mask) == (sta_ip & mask);
+}
+
+static void set_web_headers(httpd_req_t *req)
+{
     httpd_resp_set_hdr(req, "Cache-Control", "no-store");
     httpd_resp_set_hdr(req, "X-Content-Type-Options", "nosniff");
     httpd_resp_set_hdr(req, "X-Frame-Options", "DENY");
+}
+
+static bool ap_request(httpd_req_t *req)
+{
+    struct sockaddr_storage local, peer;
+    if (!request_sockets(req, &local, &peer) || !request_is_setup_ap(&local, &peer)) {
+        httpd_resp_send_err(req, HTTPD_403_FORBIDDEN, "Collegarsi alla rete Wi-Fi di setup");
+        return false;
+    }
+    set_web_headers(req);
+    return true;
+}
+
+static bool status_request(httpd_req_t *req)
+{
+    struct sockaddr_storage local, peer;
+    if (!request_sockets(req, &local, &peer) ||
+        (!request_is_setup_ap(&local, &peer) && !request_is_station_lan(&local, &peer))) {
+        httpd_resp_send_err(req, HTTPD_403_FORBIDDEN, "Solo rete AP o rete locale della scheda");
+        return false;
+    }
+    set_web_headers(req);
     return true;
 }
 
 static esp_err_t page_get(httpd_req_t *req)
 {
-    if (!ap_request(req)) return ESP_OK;
+    struct sockaddr_storage local, peer;
+    if (!request_sockets(req, &local, &peer)) {
+        httpd_resp_send_err(req, HTTPD_403_FORBIDDEN, "Rete non valida");
+        return ESP_OK;
+    }
     httpd_resp_set_type(req, "text/html; charset=utf-8");
-    return httpd_resp_send(req, (const char *)setup_html_start, setup_html_end - setup_html_start);
+    if (request_is_setup_ap(&local, &peer)) {
+        set_web_headers(req);
+        return httpd_resp_send(req, (const char *)setup_html_start, setup_html_end - setup_html_start);
+    }
+    if (request_is_station_lan(&local, &peer)) {
+        set_web_headers(req);
+        return httpd_resp_send(req, (const char *)status_html_start, status_html_end - status_html_start);
+    }
+    httpd_resp_send_err(req, HTTPD_403_FORBIDDEN, "Collegarsi alla rete di setup o alla rete locale");
+    return ESP_OK;
 }
 
 static esp_err_t config_get(httpd_req_t *req)
@@ -152,6 +218,48 @@ static esp_err_t config_get(httpd_req_t *req)
     cJSON_AddStringToObject(json, "version", esp_app_get_description()->version);
     cJSON_AddStringToObject(json, "chip", CONFIG_IDF_TARGET);
     cJSON_AddBoolToObject(json, "ota_ready", esp_ota_get_next_update_partition(NULL) != NULL);
+    char *body = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    if (!body) return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Memoria insufficiente");
+    httpd_resp_set_type(req, "application/json");
+    esp_err_t err = httpd_resp_sendstr(req, body);
+    cJSON_free(body);
+    return err;
+}
+
+static esp_err_t sensors_get(httpd_req_t *req)
+{
+    if (!status_request(req)) return ESP_OK;
+    ct_probe_snapshot_t snapshot;
+    portENTER_CRITICAL(&probe_status_mux);
+    snapshot = probe_status;
+    portEXIT_CRITICAL(&probe_status_mux);
+
+    cJSON *json = cJSON_CreateObject();
+    if (!json) return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Memoria insufficiente");
+    cJSON_AddStringToObject(json, "node", snapshot.node);
+    cJSON_AddNumberToObject(json, "gpio", snapshot.gpio);
+    cJSON_AddBoolToObject(json, "bus_ok", snapshot.bus_ok);
+    cJSON_AddStringToObject(json, "last_error", esp_err_to_name(snapshot.last_error));
+    cJSON_AddBoolToObject(json, "wifi_connected", atomic_load(&wifi_connected));
+    cJSON_AddBoolToObject(json, "mqtt_connected", atomic_load(&mqtt_connected));
+    cJSON *sensors = cJSON_AddArrayToObject(json, "sensors");
+    unsigned count = snapshot.sensor_count > CT_SETUP_MAX_SENSORS ? CT_SETUP_MAX_SENSORS : snapshot.sensor_count;
+    for (unsigned i = 0; sensors && i < count; i++) {
+        cJSON *sensor = cJSON_CreateObject();
+        if (!sensor) continue;
+        char rom[17];
+        snprintf(rom, sizeof(rom), "%016" PRIx64, snapshot.sensors[i].rom);
+        cJSON_AddStringToObject(sensor, "rom", rom);
+        cJSON_AddBoolToObject(sensor, "valid", snapshot.sensors[i].valid);
+        if (snapshot.sensors[i].valid) cJSON_AddNumberToObject(sensor, "temperature", snapshot.sensors[i].temperature);
+        char state_topic[128], discovery_topic[128];
+        snprintf(state_topic, sizeof(state_topic), "centrale/%s/%s/temperature", snapshot.node, rom);
+        snprintf(discovery_topic, sizeof(discovery_topic), "homeassistant/sensor/%s_%s/config", snapshot.node, rom);
+        cJSON_AddStringToObject(sensor, "state_topic", state_topic);
+        cJSON_AddStringToObject(sensor, "discovery_topic", discovery_topic);
+        cJSON_AddItemToArray(sensors, sensor);
+    }
     char *body = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
     if (!body) return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Memoria insufficiente");
@@ -282,6 +390,27 @@ done:
     return httpd_resp_sendstr(req, "Firmware verificato e salvato. Riavvio in corso.");
 }
 
+static void start_web_server(void)
+{
+    if (web_server) return;
+    httpd_config_t server_cfg = HTTPD_DEFAULT_CONFIG();
+    server_cfg.stack_size = 8192;
+    server_cfg.recv_wait_timeout = 5;
+    server_cfg.max_uri_handlers = 5;
+    server_cfg.lru_purge_enable = true;
+    ESP_ERROR_CHECK(httpd_start(&web_server, &server_cfg));
+    const httpd_uri_t routes[] = {
+        { .uri = "/", .method = HTTP_GET, .handler = page_get },
+        { .uri = "/api/config", .method = HTTP_GET, .handler = config_get },
+        { .uri = "/api/sensors", .method = HTTP_GET, .handler = sensors_get },
+        { .uri = "/api/config", .method = HTTP_POST, .handler = config_post },
+        { .uri = "/api/firmware", .method = HTTP_POST, .handler = firmware_post },
+    };
+    for (size_t i = 0; i < sizeof(routes) / sizeof(routes[0]); i++) {
+        ESP_ERROR_CHECK(httpd_register_uri_handler(web_server, &routes[i]));
+    }
+}
+
 static void start_ap(void)
 {
     uint8_t mac[6];
@@ -290,8 +419,6 @@ static void start_ap(void)
     static const char password[] = CONFIG_CT_SETUP_AP_PASSWORD;
     _Static_assert(sizeof(password) >= 9 && sizeof(password) <= 64,
                    "Password AP: usare da 8 a 63 caratteri");
-    snprintf(csrf, sizeof(csrf), "%08" PRIx32 "%08" PRIx32 "%08" PRIx32 "%08" PRIx32,
-             esp_random(), esp_random(), esp_random(), esp_random());
     esp_netif_t *ap = esp_netif_create_default_wifi_ap();
     assert(ap);
     esp_netif_ip_info_t ip = {};
@@ -312,20 +439,7 @@ static void start_ap(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &cfg));
     ESP_ERROR_CHECK(esp_wifi_start());
-    httpd_config_t server_cfg = HTTPD_DEFAULT_CONFIG();
-    server_cfg.stack_size = 8192;
-    server_cfg.recv_wait_timeout = 5;
-    server_cfg.max_uri_handlers = 4;
-    server_cfg.lru_purge_enable = true;
-    httpd_handle_t server;
-    ESP_ERROR_CHECK(httpd_start(&server, &server_cfg));
-    const httpd_uri_t routes[] = {
-        { .uri = "/", .method = HTTP_GET, .handler = page_get },
-        { .uri = "/api/config", .method = HTTP_GET, .handler = config_get },
-        { .uri = "/api/config", .method = HTTP_POST, .handler = config_post },
-        { .uri = "/api/firmware", .method = HTTP_POST, .handler = firmware_post },
-    };
-    for (size_t i = 0; i < sizeof(routes) / sizeof(routes[0]); i++) ESP_ERROR_CHECK(httpd_register_uri_handler(server, &routes[i]));
+    start_web_server();
     ESP_LOGI(TAG, "AP: %s | password setup: %s | pagina http://192.168.4.1", cfg.ap.ssid, password);
 }
 
@@ -420,6 +534,9 @@ static void setup_task(void *arg)
     bool ap_active = false;
     int64_t offline_since = esp_timer_get_time();
     ct_button_t press = {0};
+    snprintf(csrf, sizeof(csrf), "%08" PRIx32 "%08" PRIx32 "%08" PRIx32 "%08" PRIx32,
+             esp_random(), esp_random(), esp_random(), esp_random());
+    start_web_server();
     status_led_init();
     rgb_init();
     const int pin = CONFIG_CT_SETUP_BUTTON_GPIO;

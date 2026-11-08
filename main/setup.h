@@ -1,5 +1,25 @@
 #pragma once
 #include <stdbool.h>
+#include <stdint.h>
+
+#define CT_SETUP_MAX_SENSORS 8
+
+typedef struct {
+    uint64_t rom;
+    float temperature;
+    bool valid;
+} ct_probe_status_t;
+
+typedef struct {
+    char node[32];
+    int gpio;
+    int last_error;
+    unsigned sensor_count;
+    bool bus_ok;
+    bool wifi_connected;
+    bool mqtt_connected;
+    ct_probe_status_t sensors[CT_SETUP_MAX_SENSORS];
+} ct_probe_snapshot_t;
 
 typedef struct {
     unsigned version;
@@ -16,3 +36,4 @@ void ct_settings_load(ct_settings_t *settings);
 void ct_setup_init(bool has_ssid);
 void ct_setup_wifi_connected(bool connected);
 void ct_setup_mqtt_connected(bool connected);
+void ct_setup_probe_status_update(const ct_probe_snapshot_t *snapshot);

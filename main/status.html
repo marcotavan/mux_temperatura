@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnostica centrale termica</title>
+<style>
+body{font:16px system-ui,sans-serif;background:#eef3f4;color:#172d35;margin:0;padding:24px}main{max-width:620px;margin:auto;background:#fff;border-radius:16px;padding:24px}h1{font-size:25px}small{display:block;color:#47616b;margin-top:6px}.probe{padding:12px;margin:8px 0;background:#f3f7f7;border-radius:8px;overflow-wrap:anywhere}.probe strong{display:block}.probe small{font-size:12px}.ok{color:#087746}.bad{color:#a12d21}
+</style>
+<main><h1>Diagnostica centrale termica</h1>
+<p id="summary" role="status" aria-live="polite">Lettura dello stato...</p>
+<div id="probe-list"></div>
+<small>Aggiornamento ogni 5 secondi. Questa pagina è in sola lettura. Per configurare Wi-Fi/MQTT o aggiornare il firmware, apri la rete Centrale-Setup e visita http://192.168.4.1.</small>
+</main><script>
+const el=id=>document.getElementById(id);
+async function refresh(){try{const r=await fetch('/api/sensors',{cache:'no-store'});if(!r.ok)throw Error();const d=await r.json();const list=el('probe-list');list.replaceChildren();el('summary').textContent=`Nodo ${d.node} · GPIO${d.gpio} · bus ${d.bus_ok?'OK':'errore ('+d.last_error+')'} · Wi-Fi ${d.wifi_connected?'connesso':'non connesso'} · MQTT ${d.mqtt_connected?'connesso':'non connesso'}`;if(!d.sensors.length){const empty=document.createElement('p');empty.className='bad';empty.textContent='Nessuna sonda DS18B20 rilevata.';list.append(empty);return;}for(const s of d.sensors){const row=document.createElement('div');row.className='probe';const title=document.createElement('strong');title.textContent=`ROM ${s.rom}`;const value=document.createElement('span');value.textContent=s.valid?`${Number(s.temperature).toFixed(2)} °C`:'Nessuna lettura valida';value.className=s.valid?'ok':'bad';const topics=document.createElement('small');topics.textContent=`Stato: ${s.state_topic} · Discovery: ${s.discovery_topic}`;row.append(title,value,topics);list.append(row);}}catch{el('summary').textContent='Impossibile leggere la diagnostica: verifica che ESP32 e dispositivo siano sulla stessa rete locale.';el('probe-list').replaceChildren();}}
+refresh();setInterval(refresh,5000);
+</script></html>

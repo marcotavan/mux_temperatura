@@ -1,1 +1,1 @@
-idf_component_register(SRCS "main.c" "setup.c" "reconnect.c" "plant.c" INCLUDE_DIRS "." REQUIRES esp_wifi esp_event esp_netif nvs_flash esp_system esp_timer esp_http_server esp_driver_gpio app_update led_strip cjson mqtt ds18b20 onewire_bus EMBED_FILES "setup.html")
+idf_component_register(SRCS "main.c" "setup.c" "reconnect.c" "plant.c" INCLUDE_DIRS "." REQUIRES esp_wifi esp_event esp_netif nvs_flash esp_system esp_timer esp_http_server esp_driver_gpio app_update led_strip cjson mqtt ds18b20 onewire_bus EMBED_FILES "setup.html" "status.html")
